@@ -12,6 +12,11 @@ declare(strict_types=1);
  */
 class shopSizerPlugin extends shopPlugin
 {
+    /**
+     * @param array $params
+     * @return array|string
+     * @throws Exception
+     */
     public function getControls($params = array())
     {
         waHtmlControl::registerControl('DimensionInput', [$this, 'dimensionsInputControl']);
