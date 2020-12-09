@@ -255,4 +255,81 @@ class shopSizerPlugin extends shopPlugin
 
         parent::saveSettings($settings);
     }
+
+    /**
+     * Handler for 'shipping_package' hook
+     *
+     * @param array $items
+     * @return array
+     */
+    public function handlerShippingPackage(array $items): array
+    {
+        $total_weight = array_reduce($items, function ($carry, $item) {
+            return $carry + (float)str_replace(',', '.', $item['quantity']) *
+                (float)str_replace(',', '.', (string)ifset($item, 'weight', 0));
+        }, 0.0);
+
+        $base_weight_unit = $this->getBaseUnitCode('weight', 'kg');
+        $package_dimensions = $this->getSettings('default_size');
+        foreach (['width', 'height', 'length'] as $item)
+            $package_dimensions[$item] = (float)str_replace(',', '.', $package_dimensions[$item]);
+        $default_add_weight = $this->getSettings('default_add_weight');
+        $package_dimensions['add_weight'] = (float)str_replace(',', '.', (string)$default_add_weight['value']);
+        $package_dimensions['add_weight_unit'] = $base_weight_unit;
+        if ($default_add_weight['unit'] !== $base_weight_unit)
+            $package_dimensions['add_weight'] = shopDimension::getInstance()
+                ->convert($package_dimensions['add_weight'], 'weight', $base_weight_unit, $default_add_weight['unit']);
+
+        $sizes = $this->getSettings('sizes');
+        if ($sizes && isset($sizes['packs']) && $sizes['packs']) {
+            $sizes_weight_unit = ifset($sizes, 'weight_unit', 'kg');
+            array_walk($sizes['packs'], function (&$p) use ($sizes_weight_unit, $base_weight_unit) {
+                foreach (['weight', 'width', 'height', 'length', 'add_weight'] as $key)
+                    $p[$key] = (float)str_replace(',', '.', (string)$p[$key]);
+
+                if ($sizes_weight_unit !== $base_weight_unit)
+                    $p['weight'] = shopDimension::getInstance()
+                        ->convert($p['weight'], 'weight', $base_weight_unit, $sizes_weight_unit);
+                if ($p['add_weight_unit'] !== $base_weight_unit) {
+                    $p['add_weight'] = shopDimension::getInstance()
+                        ->convert($p['add_weight'], 'weight', $base_weight_unit, $p['add_weight_unit']);
+                    $p['add_weight_unit'] = $base_weight_unit;
+                }
+            });
+            usort($sizes['packs'], function ($a, $b) {
+                return $a['weight'] <=> $b['weight'];
+            });
+
+            foreach ($sizes['packs'] as $pack) {
+                if ($total_weight < $pack['weight']) break;
+                $package_dimensions = $pack;
+            }
+        }
+
+        $base_linear_unit = $this->getBaseUnitCode();
+        if ($package_dimensions['unit'] !== $base_linear_unit)
+            foreach (['width', 'height', 'length'] as $key) {
+                $package_dimensions[$key] = shopDimension::getInstance()
+                    ->convert($package_dimensions[$key], 'length', $base_linear_unit, $package_dimensions['unit']);
+            }
+
+        return [
+            'weight' => $total_weight + $package_dimensions['add_weight'],
+            'length' => $package_dimensions['length'],
+            'width'  => $package_dimensions['width'],
+            'height' => $package_dimensions['height']
+        ];
+    }
+
+    /**
+     * @param string $dimension
+     * @param string $default_value
+     * @return string
+     */
+    protected function getBaseUnitCode(string $dimension = 'length', string $default_value = 'm'): string
+    {
+        $base_unit = shopDimension::getBaseUnit($dimension);
+
+        return (string)ifset($base_unit, 'value', $default_value);
+    }
 }
