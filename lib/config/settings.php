@@ -20,8 +20,8 @@ return array(
     ],
 
     'sizes' => [
-        'title' => 'Размеры упаковок',
-        'value' => [
+        'title'        => 'Размеры упаковок',
+        'value'        => [
             'weight_unit' => 'kg',
             'packs'       => [
                 [
@@ -34,6 +34,7 @@ return array(
                     'add_weight_unit' => 'g'
                 ]
             ]
-        ]
+        ],
+        'control_type' => 'PackageDimensions'
     ]
 );
