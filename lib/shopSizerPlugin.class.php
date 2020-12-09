@@ -232,6 +232,8 @@ class shopSizerPlugin extends shopPlugin
                             $s['height'] = (float)str_replace(',', '.', $s['height']);
                             $s['length'] = (float)str_replace(',', '.', $s['length']);
                             $s['add_weight'] = (float)str_replace(',', '.', $s['add_weight']);
+                            if ((0 >= $s['width']) || (0 >= $s['height']) || (0 >= $s['length']))
+                                throw new waException('Измерение у размера упаковки должно быть больше нуля!');
                         }
                     });
                     usort($sizes['packs'], function ($a, $b) {
@@ -241,8 +243,11 @@ class shopSizerPlugin extends shopPlugin
                 $settings['sizes'] = $sizes;
             }
             if (isset($settings['default_size'])) {
-                foreach (['length', 'width', 'height'] as $value)
+                foreach (['length', 'width', 'height'] as $value) {
                     $settings['default_size'][$value] = (float)str_replace(',', '.', $settings['default_size'][$value]);
+                    if (0 >= $settings['default_size'][$value])
+                        throw new waException('Измерение у размера упаковки по умолчанию должно быть больше нуля!');
+                }
             }
             if (isset($settings['default_add_weight']))
                 $settings['default_add_weight']['value'] = (float)str_replace(',', '.', $settings['default_add_weight']['value']);
