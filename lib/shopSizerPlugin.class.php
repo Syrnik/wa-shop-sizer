@@ -213,4 +213,41 @@ class shopSizerPlugin extends shopPlugin
 
         return $view->fetch($this->path . '/templates/controls/package-dimensions-control.html');
     }
+
+    /**
+     * @param array $settings
+     * @return array|void
+     * @throws waException
+     */
+    public function saveSettings($settings = array())
+    {
+        if (is_array($settings)) {
+            if (isset($settings['sizes'])) {
+                $sizes = $settings['sizes'];
+                if (is_array($sizes) && isset($sizes['packs']) && is_array($sizes['packs'])) {
+                    array_walk($sizes['packs'], function (&$s) {
+                        if (is_array($s)) {
+                            $s['weight'] = (float)str_replace(',', '.', $s['weight']);
+                            $s['width'] = (float)str_replace(',', '.', $s['width']);
+                            $s['height'] = (float)str_replace(',', '.', $s['height']);
+                            $s['length'] = (float)str_replace(',', '.', $s['length']);
+                            $s['add_weight'] = (float)str_replace(',', '.', $s['add_weight']);
+                        }
+                    });
+                    usort($sizes['packs'], function ($a, $b) {
+                        return $a['weight'] <=> $b['weight'];
+                    });
+                }
+                $settings['sizes'] = $sizes;
+            }
+            if (isset($settings['default_size'])) {
+                foreach (['length', 'width', 'height'] as $value)
+                    $settings['default_size'][$value] = (float)str_replace(',', '.', $settings['default_size'][$value]);
+            }
+            if (isset($settings['default_add_weight']))
+                $settings['default_add_weight']['value'] = (float)str_replace(',', '.', $settings['default_add_weight']['value']);
+        }
+
+        parent::saveSettings($settings);
+    }
 }
