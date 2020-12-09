@@ -201,7 +201,7 @@ class shopSizerPlugin extends shopPlugin
             'add_weight_unit' => 'g'
         ]);
 
-        $empty_row = "<tr class=\"js-size-row\"><td>{$empty_row_controls['weight']}</td>" .
+        $empty_row = "<tr class=\"js-size-row\"><td>от {$empty_row_controls['weight']}</td>" .
             "<td>{$empty_row_controls['size']}</td><td>{$empty_row_controls['add_weight']}</td>" .
             "<td class=\"actions\"><a href=\"javascript:void(0)\" alt=\"Удалить\" title=\"Удалить\" class=\"js-action-delete\"><i class=\"icon16 no\"></i></a></td></tr>";
 

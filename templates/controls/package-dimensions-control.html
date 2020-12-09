@@ -17,7 +17,7 @@
     <tbody>
     {foreach $controls.packs as $pack}
         <tr class="js-size-row">
-            <td>{$pack.weight}</td>
+            <td>от {$pack.weight}</td>
             <td>{$pack.size}</td>
             <td>{$pack.add_weight}</td>
             <td class="actions">
@@ -38,6 +38,7 @@
             if (last_row.length) last_row.clone().appendTo('tbody', $table);
             else $({$empty_row|json_encode:256}).appendTo('tbody', $table);
             renumberRows();
+            showWeightUnit();
         }
 
         function deleteRow(event) {
@@ -57,7 +58,28 @@
             });
         }
 
+        function showWeightUnit() {
+            const $select = $('thead select[name$="[weight_unit]"]', $table);
+            if (!$select.length) return;
+            const unit_value = $select.val();
+            if (!unit_value || !unit_value.length) return;
+            const $option = $('option[value="' + unit_value + '"]', $select);
+            if (!$option.length) return;
+            const text = $option.text();
+            if (!text.length) return;
+
+            $('tr.js-size-row input[name$="[weight]"]', $table).each(function () {
+                const $cell = $(this).closest('td');
+                $unit_span = $('span.unit-name', $cell);
+                if ($unit_span.length) $unit_span.text(' ' + text);
+                else $cell.append('<span class="unit-name"> ' + text + '</span>');
+            });
+        }
+
         $table.on('click.sizer', '.js-action-delete', deleteRow)
             .on('click.sizer', '.js-action-add', addRow)
+            .on('change.sizer', 'thead select[name$="[weight_unit]"]', showWeightUnit)
+
+        showWeightUnit();
     })();
 </script>
