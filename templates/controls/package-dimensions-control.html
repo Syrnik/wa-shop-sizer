@@ -70,7 +70,7 @@
 
             $('tr.js-size-row input[name$="[weight]"]', $table).each(function () {
                 const $cell = $(this).closest('td');
-                $unit_span = $('span.unit-name', $cell);
+                const $unit_span = $('span.unit-name', $cell);
                 if ($unit_span.length) $unit_span.text(' ' + text);
                 else $cell.append('<span class="unit-name"> ' + text + '</span>');
             });
