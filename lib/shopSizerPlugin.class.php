@@ -265,14 +265,14 @@ class shopSizerPlugin extends shopPlugin
     public function handlerShippingPackage(array $items): array
     {
         $total_weight = array_reduce($items, function ($carry, $item) {
-            return $carry + (float)str_replace(',', '.', $item['quantity']) *
+            return $carry + (float)str_replace(',', '.', (string)$item['quantity']) *
                 (float)str_replace(',', '.', (string)ifset($item, 'weight', 0));
         }, 0.0);
 
         $base_weight_unit = $this->getBaseUnitCode('weight', 'kg');
         $package_dimensions = $this->getSettings('default_size');
         foreach (['width', 'height', 'length'] as $item)
-            $package_dimensions[$item] = (float)str_replace(',', '.', $package_dimensions[$item]);
+            $package_dimensions[$item] = (float)str_replace(',', '.', (string)$package_dimensions[$item]);
         $default_add_weight = $this->getSettings('default_add_weight');
         $package_dimensions['add_weight'] = (float)str_replace(',', '.', (string)$default_add_weight['value']);
         $package_dimensions['add_weight_unit'] = $base_weight_unit;
