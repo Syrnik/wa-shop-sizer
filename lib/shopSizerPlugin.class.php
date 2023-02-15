@@ -198,7 +198,7 @@ class shopSizerPlugin extends shopPlugin
 
         $empty_row = "<tr class=\"js-size-row\"><td>от {$empty_row_controls['weight']}</td>" .
             "<td>{$empty_row_controls['size']}</td><td>{$empty_row_controls['add_weight']}</td>" .
-            "<td class=\"actions\"><a href=\"javascript:void(0)\" alt=\"Удалить\" title=\"Удалить\" class=\"js-action-delete\"><i class=\"icon16 no\"></i></a></td></tr>";
+            "<td class=\"actions\"><a href=\"javascript:void(0)\" title=\"" . _wp('Удалить') . "\" class=\"js-action-delete\"><i class=\"icon16 no\"></i></a></td></tr>";
 
         $namespace = (string)waHtmlControl::makeNamespace($row_params);
         $table_id = $params['id'] . '-table';
@@ -228,7 +228,7 @@ class shopSizerPlugin extends shopPlugin
                             $s['length'] = (float)str_replace(',', '.', $s['length']);
                             $s['add_weight'] = (float)str_replace(',', '.', $s['add_weight']);
                             if ((0 >= $s['width']) || (0 >= $s['height']) || (0 >= $s['length']))
-                                throw new waException('Измерение у размера упаковки должно быть больше нуля!');
+                                throw new waException(_wp('Измерение у размера упаковки должно быть больше нуля!'));
                         }
                     });
                     usort($sizes['packs'], function ($a, $b) {
@@ -241,7 +241,7 @@ class shopSizerPlugin extends shopPlugin
                 foreach (['length', 'width', 'height'] as $value) {
                     $settings['default_size'][$value] = (float)str_replace(',', '.', $settings['default_size'][$value]);
                     if (0 >= $settings['default_size'][$value])
-                        throw new waException('Измерение у размера упаковки по умолчанию должно быть больше нуля!');
+                        throw new waException(_wp('Измерение у размера упаковки по умолчанию должно быть больше нуля!'));
                 }
             }
             if (isset($settings['default_add_weight']))
@@ -262,7 +262,7 @@ class shopSizerPlugin extends shopPlugin
     {
         $total_weight = array_reduce($items, function ($carry, $item) {
             return $carry + (float)str_replace(',', '.', (string)$item['quantity']) *
-                (float)str_replace(',', '.', (string)ifset($item, 'weight', 0));
+                (float)str_replace(',', '.', (string)($item['weight'] ?? 0));
         }, 0.0);
 
         $base_weight_unit = $this->getBaseUnitCode('weight', 'kg');
@@ -278,7 +278,7 @@ class shopSizerPlugin extends shopPlugin
 
         $sizes = $this->getSettings('sizes');
         if ($sizes && isset($sizes['packs']) && $sizes['packs']) {
-            $sizes_weight_unit = ifset($sizes, 'weight_unit', 'kg');
+            $sizes_weight_unit = $sizes['weight_unit'] ?? 'kg';
             array_walk($sizes['packs'], function (&$p) use ($sizes_weight_unit, $base_weight_unit) {
                 foreach (['weight', 'width', 'height', 'length', 'add_weight'] as $key)
                     $p[$key] = (float)str_replace(',', '.', (string)$p[$key]);
