@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Serge Rodovnichenko <serge@syrnik.com>
- * @copyright Serge Rodovnichenko, 2020
+ * @copyright Serge Rodovnichenko, 2020-2023
  * @license Webasyst
  */
 
@@ -17,7 +17,7 @@ class shopSizerPlugin extends shopPlugin
      * @return array|string
      * @throws Exception
      */
-    public function getControls($params = array())
+    public function getControls($params = array()): array|string
     {
         waHtmlControl::registerControl('DimensionInput', [$this, 'dimensionsInputControl']);
         waHtmlControl::registerControl('WeightInput', [$this, 'weightInputControl']);
@@ -34,9 +34,7 @@ class shopSizerPlugin extends shopPlugin
     public function dimensionsInputControl(string $name, array $params = []): string
     {
         $default_params = ['title' => '', 'title_wrapper' => false, 'description' => ''];
-        $params = array_filter($params, function ($field) {
-            return strpos($field, 'wrapper') === false;
-        }, ARRAY_FILTER_USE_KEY);
+        $params = array_filter($params, fn($field) => !str_contains($field, 'wrapper'), ARRAY_FILTER_USE_KEY);
 
         waHtmlControl::makeId($params, $name);
 
@@ -48,7 +46,7 @@ class shopSizerPlugin extends shopPlugin
 
         if (!isset($params['value']['unit'])) {
             $base_unit = shopDimension::getBaseUnit('length');
-            $params['value']['unit'] = ifset($base_unit, 'value', 'm');
+            $params['value']['unit'] = $base_unit['value'] ?? 'm';
         }
 
         $params = array_merge($params, $default_params);
@@ -59,7 +57,7 @@ class shopSizerPlugin extends shopPlugin
         foreach (['length', 'width', 'height'] as $item) {
             $item_params = $params;
             $item_params['value'] = $params['value'][$item];
-            $item_params['class'] = array_merge((array)ifset($item_params, 'class', []), ['short', 'numerical']);
+            $item_params['class'] = array_merge((array)($item_params['class'] ?? []), ['short', 'numerical']);
             $item_params['placeholder'] = 0;
             $item_params['field_type'] = 'number';
             $item_params['min'] = '0';
@@ -85,16 +83,16 @@ class shopSizerPlugin extends shopPlugin
      */
     public function weightInputControl(string $name, array $params = []): string
     {
-        $value = (array)ifset($params, 'value', []);
-        $weight_field_name = ifset($params, 'field_names', 'value', 'value') ?: 'value';
-        $unit_field_name = ifset($params, 'field_names', 'unit', 'unit') ?: 'unit';
-        $weight_value = ifset($value, $weight_field_name, 0);
+        $value = (array)($params['value'] ?? []);
+        $weight_field_name = ($params['field_names']['value'] ?? 'value') ?: 'value';
+        $unit_field_name = ($params['field_names']['unit'] ?? 'unit') ?: 'unit';
+        $weight_value = $value[$weight_field_name] ?? 0;
         if (is_string($weight_value))
             $weight_value = (float)str_replace(',', '.', trim($weight_value));
-        $unit_value = ifset($value, $unit_field_name, 'kg') ?: 'kg';
+        $unit_value = ($value[$unit_field_name] ?? 'kg') ?: 'kg';
         if (!$unit_value) {
             $base_unit = shopDimension::getBaseUnit('weight');
-            $unit_value = ifset($base_unit, 'value', 'kg');
+            $unit_value = $base_unit['value'] ?? 'kg';
         }
 
         unset($params['field_names']);
@@ -103,15 +101,13 @@ class shopSizerPlugin extends shopPlugin
         waHtmlControl::makeId($params);
 
         $default_params = ['title' => '', 'title_wrapper' => false, 'description' => '',];
-        $params = array_filter($params, function ($field) {
-            return strpos($field, 'wrapper') === false;
-        }, ARRAY_FILTER_USE_KEY);
+        $params = array_filter($params, fn($field) => !str_contains($field, 'wrapper'), ARRAY_FILTER_USE_KEY);
 
         $params = array_merge($params, $default_params);
         waHtmlControl::addNamespace($params, $name);
         $weight_field_params = array_merge($params, [
             'value'       => $weight_value,
-            'class'       => ifset($params, 'value_field_class', ['short', 'numerical']),
+            'class'       => $params['value_field_class'] ?? ['short', 'numerical'],
             'placeholder' => '0',
             'field_type'  => 'number',
             'min'         => '0'
@@ -131,13 +127,12 @@ class shopSizerPlugin extends shopPlugin
      * @return string
      * @throws SmartyException
      * @throws waException
+     * @throws Exception
      */
     public function packagesDimensionsControl(string $name, array $params = []): string
     {
         $default_params = ['title' => '', 'title_wrapper' => false, 'description' => ''];
-        $params = array_filter($params, function ($field) {
-            return strpos($field, 'wrapper') === false;
-        }, ARRAY_FILTER_USE_KEY);
+        $params = array_filter($params, fn($field) => !str_contains($field, 'wrapper'), ARRAY_FILTER_USE_KEY);
 
         $params = array_merge($params, $default_params);
         waHtmlControl::addNamespace($params, $name);
@@ -259,6 +254,7 @@ class shopSizerPlugin extends shopPlugin
     /**
      * Handler for 'shipping_package' hook
      *
+     * @EventHandler shipping_package
      * @param array $items
      * @return array
      */
@@ -330,6 +326,6 @@ class shopSizerPlugin extends shopPlugin
     {
         $base_unit = shopDimension::getBaseUnit($dimension);
 
-        return (string)ifset($base_unit, 'value', $default_value);
+        return (string)($base_unit['value'] ?? $default_value);
     }
 }
