@@ -1,0 +1,55 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: shop/plugins/sizer\n"
+"POT-Creation-Date: 2023-02-16 20:09+0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: shop/plugins/sizer\n"
+"Language-Team: shop/plugins/sizer\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: en_US\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: utf-8\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "Размеры упаковки"
+msgstr "Package dimensions"
+
+msgid "Вес упаковки"
+msgstr "Package weight"
+
+msgid "Добавить условие"
+msgstr "Add condition"
+
+msgid "Удалить"
+msgstr "Delete"
+
+msgid "Вес заказа, %s"
+msgstr "Order weight, %s"
+
+msgid "Измерение у размера упаковки должно быть больше нуля!"
+msgstr "Each dimension of the package size must be greater than zero!"
+
+msgid "Измерение у размера упаковки по умолчанию должно быть больше нуля!"
+msgstr "Each dimension of the default package size must be greater than zero!"
+
+msgid "Размеры для веса"
+msgstr "Dimensions for weight"
+
+msgid "Размер упаковки по умолчанию"
+msgstr "Default package size"
+
+msgid "На случай, если ни одно из правил не подойдёт"
+msgstr "In case none of the rules work"
+
+msgid "Вес упаковки по умолчанию"
+msgstr "Default package weight"
+
+msgid "Какой вес добавить к общему весу заказа, если ни одно из правил не подойдёт"
+msgstr "The weight to be added to the total weight of the order if none of the rules will fit"
+
+msgid "Размеры упаковок"
+msgstr "Package sizes"
