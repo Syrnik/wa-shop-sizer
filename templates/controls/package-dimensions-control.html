@@ -1,27 +1,26 @@
 <table class="zebra" id="{$table_id}">
     <thead>
     <tr>
-        <th>Вес заказа, {$controls['weight_unit']}</th>
-        <th>Размеры упаковки</th>
-        <th>Вес упаковки</th>
+        <th>{sprintf(_wp('Вес заказа, %s'), $controls['weight_unit'])}</th>
+        <th>[`Размеры упаковки`]</th>
+        <th>[`Вес упаковки`]</th>
         <th></th>
     </tr>
     </thead>
     <tfoot>
     <tr>
-        <td colspan="4" style="background-color: white;border-top: 1px solid #bbb"><a href="javascript:void(0)"
-                                                                                      class="inline-link js-action-add"><i
-                        class="icon16 plus"></i><b><i>Добавить условие</i></b></a></td>
+        <td colspan="4" style="background-color: white;border-top: 1px solid #bbb"><a href="javascript:void(0)" class="inline-link js-action-add"><i
+                        class="icon16 plus"></i><b><i>[`Добавить условие`]</i></b></a></td>
     </tr>
     </tfoot>
     <tbody>
     {foreach $controls.packs as $pack}
         <tr class="js-size-row">
-            <td>от {$pack.weight}</td>
+            <td>≥ {$pack.weight}</td>
             <td>{$pack.size}</td>
             <td>{$pack.add_weight}</td>
             <td class="actions">
-                <a href="javascript:void(0)" alt="Удалить" title="Удалить" class="js-action-delete"><i
+                <a href="javascript:void(0)" title="[`Удалить`]" class="js-action-delete"><i
                             class="icon16 no"></i></a>
             </td>
         </tr>

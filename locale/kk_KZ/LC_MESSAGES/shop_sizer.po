@@ -1,0 +1,55 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: shop/plugins/sizer\n"
+"POT-Creation-Date: 2023-02-16 20:22+0300\n"
+"PO-Revision-Date: \n"
+"Last-Translator: shop/plugins/sizer\n"
+"Language-Team: shop/plugins/sizer\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: kk_KZ\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: utf-8\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
+
+msgid "Размеры упаковки"
+msgstr "Қаптама өлшемдері"
+
+msgid "Вес упаковки"
+msgstr "Қаптаманың салмағы"
+
+msgid "Добавить условие"
+msgstr "Шарт қосу"
+
+msgid "Удалить"
+msgstr "Жою"
+
+msgid "Вес заказа, %s"
+msgstr "Тапсырыс салмағы, %s"
+
+msgid "Размеры для веса"
+msgstr "Салмақ өлшемдері"
+
+msgid "Измерение у размера упаковки должно быть больше нуля!"
+msgstr "Өлшеу қаптаманың өлшемі нөлден үлкен болуы керек!"
+
+msgid "Измерение у размера упаковки по умолчанию должно быть больше нуля!"
+msgstr "Өлшем қаптаманың әдепкі өлшемі нөлден үлкен болуы керек!"
+
+msgid "Размер упаковки по умолчанию"
+msgstr "Қаптаманың әдепкі өлшемі"
+
+msgid "На случай, если ни одно из правил не подойдёт"
+msgstr "Егер ережелердің ешқайсысы орындалмаса"
+
+msgid "Вес упаковки по умолчанию"
+msgstr "Қаптаманың әдепкі салмағы"
+
+msgid "Какой вес добавить к общему весу заказа, если ни одно из правил не подойдёт"
+msgstr "Егер ережелердің ешқайсысы орындалмаса, тапсырыстың жалпы салмағына қосылатын салмақ"
+
+msgid "Размеры упаковок"
+msgstr "Қаптама өлшемдері"
