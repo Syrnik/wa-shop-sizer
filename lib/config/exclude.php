@@ -41,4 +41,5 @@ return array(
     'dox/*',
     'AGENTS.md',
     'CLAUDE.md',
+    'compress-app-plugin.php',
 );

@@ -5,6 +5,6 @@
  */
 
 return [
-    'php'      => ['version' => '>=8.0.0', 'strict' => true],
+    'php' => ['version' => '8.2.0', 'strict' => true],
     'app.shop' => ['version' => '>=8.0.0', 'strict' => true]
 ];
