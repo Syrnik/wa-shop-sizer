@@ -1,3 +1,14 @@
+{$_is_ui2 = version_compare($wa->whichUI(), '2.0', '>=')}
+
+{capture assign="_delete_button"}
+    {if $_is_ui2}
+        <button class="outlined smaller red button js-action-delete" type="button" title="{_wp('Удалить')|escape}"><i
+                    class="fas fa-trash-alt"></i></button>
+    {else}
+        <a href="javascript:void(0)" title="{_wp('Удалить')|escape}" class="js-action-delete"><i class="icon16 no"></i></a>
+    {/if}
+{/capture}
+
 <table class="zebra" id="{$table_id}">
     <thead>
     <tr>
@@ -9,8 +20,17 @@
     </thead>
     <tfoot>
     <tr>
-        <td colspan="4" style="background-color: white;border-top: 1px solid #bbb"><a href="javascript:void(0)" class="inline-link js-action-add"><i
-                        class="icon16 plus"></i><b><i>[`Добавить условие`]</i></b></a></td>
+        {if $_is_ui2}
+            <td colspan="4" class="bordered-top">
+                <button class="outlined smaller green button js-action-add" type="button">
+                    {_wp('Добавить условие')|escape}
+                </button>
+            </td>
+        {else}
+            <td colspan="4" style="background-color: white;border-top: 1px solid #bbb"><a href="javascript:void(0)"
+                                                                                          class="inline-link js-action-add"><i
+                            class="icon16 plus"></i><b><i>{_wp('Добавить условие')|escape}</i></b></a></td>
+        {/if}
     </tr>
     </tfoot>
     <tbody>
@@ -20,22 +40,44 @@
             <td>{$pack.size}</td>
             <td>{$pack.add_weight}</td>
             <td class="actions">
-                <a href="javascript:void(0)" title="[`Удалить`]" class="js-action-delete"><i
-                            class="icon16 no"></i></a>
+                {$_delete_button}
             </td>
         </tr>
     {/foreach}
     </tbody>
 </table>
+{capture assign="_empty_row"}
+    <tr class="js-size-row">
+        <td>
+            {_wp('от')|escape}
+            {$empty_row_controls['weight']}
+        </td>
+        <td>
+            {$empty_row_controls['size']}
+        </td>
+        <td>
+            {$empty_row_controls['add_weight']}
+        </td>
+        <td class="actions">
+            {$_delete_button}
+        </td>
+    </tr>
+{/capture}
 <script>
     (function () {
         const $table = $('#{$table_id}');
+        {literal}
+        const renumberRegex = /[.*+?^${}()|[\]\\]/g;
+        {/literal}
 
         function addRow(event) {
             event.preventDefault();
             const last_row = $('tr.js-size-row', $table).last();
-            if (last_row.length) last_row.clone().appendTo('tbody', $table);
-            else $({$empty_row|json_encode:256}).appendTo('tbody', $table);
+            if (last_row.length) {
+                last_row.clone().appendTo('tbody', $table);
+            } else {
+                $({$_empty_row|json_encode:256}).appendTo('tbody', $table);
+            }
             renumberRows();
             showWeightUnit();
         }
@@ -47,7 +89,7 @@
         }
 
         function renumberRows() {
-            const regex = new RegExp('^(' + '{$namespace}['.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(\\d+)(\\])');
+            const regex = new RegExp('^(' + '{$namespace}['.replace(renumberRegex, '\\$&') + ')(\\d+)(\\])');
             $('tr.js-size-row').each(function (idx) {
                 const replacement = "$1" + idx + "$3";
                 $(this).find(':input[name^="{$namespace}["]').each(function () {

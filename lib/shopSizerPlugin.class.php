@@ -36,6 +36,8 @@ class shopSizerPlugin extends shopPlugin
         $default_params = ['title' => '', 'title_wrapper' => false, 'description' => ''];
         $params = array_filter($params, fn($field) => !str_contains($field, 'wrapper'), ARRAY_FILTER_USE_KEY);
 
+        $is_ui2 = version_compare(wa()->whichUI(), '2.0', '>=');
+
         waHtmlControl::makeId($params, $name);
 
         if (!isset($params['value']) || !is_array($params['value'])) {
@@ -61,7 +63,10 @@ class shopSizerPlugin extends shopPlugin
         foreach (['length', 'width', 'height'] as $item) {
             $item_params = $params;
             $item_params['value'] = $params['value'][$item];
-            $item_params['class'] = array_merge((array)($item_params['class'] ?? []), ['short', 'numerical']);
+            $item_params['class'] = array_merge(
+                (array)($item_params['class'] ?? []),
+                ($is_ui2 ? ['shortest'] : ['short', 'numerical'])
+            );
             $item_params['placeholder'] = 0;
             $item_params['field_type'] = 'number';
             $item_params['min'] = '0';
@@ -92,6 +97,7 @@ class shopSizerPlugin extends shopPlugin
      */
     public function weightInputControl(string $name, array $params = []): string
     {
+        $is_ui2 = version_compare(wa()->whichUI(), '2.0', '>=');
         $value = (array)($params['value'] ?? []);
         $weight_field_name = ($params['field_names']['value'] ?? 'value') ?: 'value';
         $unit_field_name = ($params['field_names']['unit'] ?? 'unit') ?: 'unit';
@@ -117,7 +123,7 @@ class shopSizerPlugin extends shopPlugin
         waHtmlControl::addNamespace($params, $name);
         $weight_field_params = array_merge($params, [
             'value' => $weight_value,
-            'class' => $params['value_field_class'] ?? ['short', 'numerical'],
+            'class' => $params['value_field_class'] ?? ($is_ui2 ? ['shortest'] : ['short', 'numerical']),
             'placeholder' => '0',
             'field_type' => 'number',
             'min' => '0'
@@ -142,6 +148,7 @@ class shopSizerPlugin extends shopPlugin
      */
     public function packagesDimensionsControl(string $name, array $params = []): string
     {
+        $is_ui2 = version_compare(wa()->whichUI(), '2.0', '>=');
         $default_params = ['title' => '', 'title_wrapper' => false, 'description' => ''];
         $params = array_filter($params, fn($field) => !str_contains($field, 'wrapper'), ARRAY_FILTER_USE_KEY);
 
@@ -162,7 +169,7 @@ class shopSizerPlugin extends shopPlugin
         $row_params = $params;
         waHtmlControl::addNamespace($row_params, 'packs');
 
-        $grid_row = function ($params, $id, $pack) {
+        $grid_row = function ($params, $id, $pack) use ($is_ui2) {
             $row_params = $params;
             $controls = [];
             waHtmlControl::addNamespace($row_params, $id);
@@ -174,7 +181,7 @@ class shopSizerPlugin extends shopPlugin
                     'field_type' => 'number',
                     'min' => '0',
                     'step' => '0.001',
-                    'class' => 'short numerical'
+                    'class' => ($is_ui2 ? 'shortest' : 'short numerical')
                 ])
             );
             $controls['weight'] = $weight_control;
@@ -228,7 +235,7 @@ class shopSizerPlugin extends shopPlugin
         $table_id = $params['id'] . '-table';
 
         $view = new waSmarty3View(wa());
-        $view->assign(compact('controls', 'namespace', 'table_id', 'empty_row'));
+        $view->assign(compact('controls', 'namespace', 'table_id', 'empty_row_controls'));
 
         return $view->fetch($this->path . '/templates/controls/package-dimensions-control.html');
     }
