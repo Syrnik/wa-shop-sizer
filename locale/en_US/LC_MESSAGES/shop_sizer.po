@@ -53,3 +53,6 @@ msgstr "The weight to be added to the total weight of the order if none of the r
 
 msgid "Размеры упаковок"
 msgstr "Package sizes"
+
+msgid "от"
+msgstr "from"

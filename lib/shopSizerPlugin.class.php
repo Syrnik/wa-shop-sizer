@@ -38,11 +38,15 @@ class shopSizerPlugin extends shopPlugin
 
         waHtmlControl::makeId($params, $name);
 
-        if (!isset($params['value']) || !is_array($params['value']))
+        if (!isset($params['value']) || !is_array($params['value'])) {
             $params['value'] = ['length' => 0, 'width' => 0, 'height' => 0, 'unit' => 'm'];
+        }
 
-        foreach (['length', 'width', 'height'] as $item)
-            if (!isset($params['value'][$item])) $params['value'][$item] = 0;
+        foreach (['length', 'width', 'height'] as $item) {
+            if (!isset($params['value'][$item])) {
+                $params['value'][$item] = 0;
+            }
+        }
 
         if (!isset($params['value']['unit'])) {
             $base_unit = shopDimension::getBaseUnit('length');
@@ -68,11 +72,16 @@ class shopSizerPlugin extends shopPlugin
 
         return implode('×', $controls_arr) .
             ' ' .
-            trim(waHtmlControl::getControl(
-                waHtmlControl::SELECT,
-                'unit',
-                array_merge($params, ['value' => $params['value']['unit'], 'options' => shopDimension::getUnits('length')])
-            ));
+            trim(
+                waHtmlControl::getControl(
+                    waHtmlControl::SELECT,
+                    'unit',
+                    array_merge(
+                        $params,
+                        ['value' => $params['value']['unit'], 'options' => shopDimension::getUnits('length')]
+                    )
+                )
+            );
     }
 
     /**
@@ -87,8 +96,9 @@ class shopSizerPlugin extends shopPlugin
         $weight_field_name = ($params['field_names']['value'] ?? 'value') ?: 'value';
         $unit_field_name = ($params['field_names']['unit'] ?? 'unit') ?: 'unit';
         $weight_value = $value[$weight_field_name] ?? 0;
-        if (is_string($weight_value))
+        if (is_string($weight_value)) {
             $weight_value = (float)str_replace(',', '.', trim($weight_value));
+        }
         $unit_value = ($value[$unit_field_name] ?? 'kg') ?: 'kg';
         if (!$unit_value) {
             $base_unit = shopDimension::getBaseUnit('weight');
@@ -106,14 +116,15 @@ class shopSizerPlugin extends shopPlugin
         $params = array_merge($params, $default_params);
         waHtmlControl::addNamespace($params, $name);
         $weight_field_params = array_merge($params, [
-            'value'       => $weight_value,
-            'class'       => $params['value_field_class'] ?? ['short', 'numerical'],
+            'value' => $weight_value,
+            'class' => $params['value_field_class'] ?? ['short', 'numerical'],
             'placeholder' => '0',
-            'field_type'  => 'number',
-            'min'         => '0'
+            'field_type' => 'number',
+            'min' => '0'
         ]);
         $unit_field_params = array_merge($params, [
-            'value' => $unit_value, 'options' => shopDimension::getUnits('weight')
+            'value' => $unit_value,
+            'options' => shopDimension::getUnits('weight')
         ]);
         $controls[] = trim(waHtmlControl::getControl(waHtmlControl::INPUT, $weight_field_name, $weight_field_params));
         $controls[] = trim(waHtmlControl::getControl(waHtmlControl::SELECT, $unit_field_name, $unit_field_params));
@@ -141,7 +152,10 @@ class shopSizerPlugin extends shopPlugin
             'weight_unit' => waHtmlControl::getControl(
                 waHtmlControl::SELECT,
                 'weight_unit',
-                array_merge($params, ['value' => $params['value']['weight_unit'], 'options' => shopDimension::getUnits('weight')])
+                array_merge(
+                    $params,
+                    ['value' => $params['value']['weight_unit'], 'options' => shopDimension::getUnits('weight')]
+                )
             )
         ];
 
@@ -156,11 +170,11 @@ class shopSizerPlugin extends shopPlugin
                 waHtmlControl::INPUT,
                 'weight',
                 array_merge($row_params, [
-                    'value'      => $pack['weight'],
+                    'value' => $pack['weight'],
                     'field_type' => 'number',
-                    'min'        => '0',
-                    'step'       => '0.001',
-                    'class'      => 'short numerical'
+                    'min' => '0',
+                    'step' => '0.001',
+                    'class' => 'short numerical'
                 ])
             );
             $controls['weight'] = $weight_control;
@@ -168,14 +182,19 @@ class shopSizerPlugin extends shopPlugin
                 'DimensionInput',
                 $id,
                 array_merge($params, [
-                    'value' => ['length' => $pack['length'], 'width' => $pack['width'], 'height' => $pack['height'], 'unit' => $pack['unit']]
+                    'value' => [
+                        'length' => $pack['length'],
+                        'width' => $pack['width'],
+                        'height' => $pack['height'],
+                        'unit' => $pack['unit']
+                    ]
                 ])
             );
             $controls['add_weight'] = waHtmlControl::getControl(
                 'WeightInput',
                 $id,
                 array_merge($params, [
-                    'value'       => ['add_weight' => $pack['add_weight'], 'add_weight_unit' => $pack['add_weight_unit']],
+                    'value' => ['add_weight' => $pack['add_weight'], 'add_weight_unit' => $pack['add_weight_unit']],
                     'field_names' => ['value' => 'add_weight', 'unit' => 'add_weight_unit']
                 ])
             );
@@ -183,22 +202,27 @@ class shopSizerPlugin extends shopPlugin
             return $controls;
         };
 
-        foreach ($params['value']['packs'] as $id => $pack)
+        foreach ($params['value']['packs'] as $id => $pack) {
             $controls['packs'][$id] = $grid_row($row_params, $id, $pack);
+        }
 
         $empty_row_controls = $grid_row($row_params, 0, [
-            'weight'          => 1,
-            'width'           => 10,
-            'height'          => 10,
-            'length'          => 10,
-            'unit'            => 'cm',
-            'add_weight'      => 30,
+            'weight' => 1,
+            'width' => 10,
+            'height' => 10,
+            'length' => 10,
+            'unit' => 'cm',
+            'add_weight' => 30,
             'add_weight_unit' => 'g'
         ]);
 
-        $empty_row = "<tr class=\"js-size-row\"><td>от {$empty_row_controls['weight']}</td>" .
+        $empty_row = "<tr class=\"js-size-row\"><td>"
+            . _wp('от')
+            . " {$empty_row_controls['weight']}</td>" .
             "<td>{$empty_row_controls['size']}</td><td>{$empty_row_controls['add_weight']}</td>" .
-            "<td class=\"actions\"><a href=\"javascript:void(0)\" title=\"" . _wp('Удалить') . "\" class=\"js-action-delete\"><i class=\"icon16 no\"></i></a></td></tr>";
+            "<td class=\"actions\"><a href=\"javascript:void(0)\" title=\""
+            . _wp('Удалить')
+            . "\" class=\"js-action-delete\"><i class=\"icon16 no\"></i></a></td></tr>";
 
         $namespace = (string)waHtmlControl::makeNamespace($row_params);
         $table_id = $params['id'] . '-table';
@@ -227,8 +251,9 @@ class shopSizerPlugin extends shopPlugin
                             $s['height'] = (float)str_replace(',', '.', $s['height']);
                             $s['length'] = (float)str_replace(',', '.', $s['length']);
                             $s['add_weight'] = (float)str_replace(',', '.', $s['add_weight']);
-                            if ((0 >= $s['width']) || (0 >= $s['height']) || (0 >= $s['length']))
+                            if ((0 >= $s['width']) || (0 >= $s['height']) || (0 >= $s['length'])) {
                                 throw new waException(_wp('Измерение у размера упаковки должно быть больше нуля!'));
+                            }
                         }
                     });
                     usort($sizes['packs'], function ($a, $b) {
@@ -240,12 +265,20 @@ class shopSizerPlugin extends shopPlugin
             if (isset($settings['default_size'])) {
                 foreach (['length', 'width', 'height'] as $value) {
                     $settings['default_size'][$value] = (float)str_replace(',', '.', $settings['default_size'][$value]);
-                    if (0 >= $settings['default_size'][$value])
-                        throw new waException(_wp('Измерение у размера упаковки по умолчанию должно быть больше нуля!'));
+                    if (0 >= $settings['default_size'][$value]) {
+                        throw new waException(
+                            _wp('Измерение у размера упаковки по умолчанию должно быть больше нуля!')
+                        );
+                    }
                 }
             }
-            if (isset($settings['default_add_weight']))
-                $settings['default_add_weight']['value'] = (float)str_replace(',', '.', $settings['default_add_weight']['value']);
+            if (isset($settings['default_add_weight'])) {
+                $settings['default_add_weight']['value'] = (float)str_replace(
+                    ',',
+                    '.',
+                    $settings['default_add_weight']['value']
+                );
+            }
         }
 
         parent::saveSettings($settings);
@@ -267,28 +300,47 @@ class shopSizerPlugin extends shopPlugin
 
         $base_weight_unit = $this->getBaseUnitCode('weight', 'kg');
         $package_dimensions = $this->getSettings('default_size');
-        foreach (['width', 'height', 'length'] as $item)
+        foreach (['width', 'height', 'length'] as $item) {
             $package_dimensions[$item] = (float)str_replace(',', '.', (string)$package_dimensions[$item]);
+        }
         $default_add_weight = $this->getSettings('default_add_weight');
         $package_dimensions['add_weight'] = (float)str_replace(',', '.', (string)$default_add_weight['value']);
         $package_dimensions['add_weight_unit'] = $base_weight_unit;
-        if ($default_add_weight['unit'] !== $base_weight_unit)
+        if ($default_add_weight['unit'] !== $base_weight_unit) {
             $package_dimensions['add_weight'] = shopDimension::getInstance()
-                ->convert($package_dimensions['add_weight'], 'weight', $base_weight_unit, $default_add_weight['unit']);
+                                                             ->convert(
+                                                                 $package_dimensions['add_weight'],
+                                                                 'weight',
+                                                                 $base_weight_unit,
+                                                                 $default_add_weight['unit']
+                                                             );
+        }
 
         $sizes = $this->getSettings('sizes');
         if ($sizes && isset($sizes['packs']) && $sizes['packs']) {
             $sizes_weight_unit = $sizes['weight_unit'] ?? 'kg';
             array_walk($sizes['packs'], function (&$p) use ($sizes_weight_unit, $base_weight_unit) {
-                foreach (['weight', 'width', 'height', 'length', 'add_weight'] as $key)
+                foreach (['weight', 'width', 'height', 'length', 'add_weight'] as $key) {
                     $p[$key] = (float)str_replace(',', '.', (string)$p[$key]);
+                }
 
-                if ($sizes_weight_unit !== $base_weight_unit)
+                if ($sizes_weight_unit !== $base_weight_unit) {
                     $p['weight'] = shopDimension::getInstance()
-                        ->convert($p['weight'], 'weight', $base_weight_unit, $sizes_weight_unit);
+                                                ->convert(
+                                                    $p['weight'],
+                                                    'weight',
+                                                    $base_weight_unit,
+                                                    $sizes_weight_unit
+                                                );
+                }
                 if ($p['add_weight_unit'] !== $base_weight_unit) {
                     $p['add_weight'] = shopDimension::getInstance()
-                        ->convert($p['add_weight'], 'weight', $base_weight_unit, $p['add_weight_unit']);
+                                                    ->convert(
+                                                        $p['add_weight'],
+                                                        'weight',
+                                                        $base_weight_unit,
+                                                        $p['add_weight_unit']
+                                                    );
                     $p['add_weight_unit'] = $base_weight_unit;
                 }
             });
@@ -297,22 +349,30 @@ class shopSizerPlugin extends shopPlugin
             });
 
             foreach ($sizes['packs'] as $pack) {
-                if ($total_weight < $pack['weight']) break;
+                if ($total_weight < $pack['weight']) {
+                    break;
+                }
                 $package_dimensions = $pack;
             }
         }
 
         $base_linear_unit = $this->getBaseUnitCode();
-        if ($package_dimensions['unit'] !== $base_linear_unit)
+        if ($package_dimensions['unit'] !== $base_linear_unit) {
             foreach (['width', 'height', 'length'] as $key) {
                 $package_dimensions[$key] = shopDimension::getInstance()
-                    ->convert($package_dimensions[$key], 'length', $base_linear_unit, $package_dimensions['unit']);
+                                                         ->convert(
+                                                             $package_dimensions[$key],
+                                                             'length',
+                                                             $base_linear_unit,
+                                                             $package_dimensions['unit']
+                                                         );
             }
+        }
 
         return [
             'weight' => $total_weight + $package_dimensions['add_weight'],
             'length' => $package_dimensions['length'],
-            'width'  => $package_dimensions['width'],
+            'width' => $package_dimensions['width'],
             'height' => $package_dimensions['height']
         ];
     }
