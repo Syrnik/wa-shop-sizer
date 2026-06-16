@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-06-17
+
 ### Added
 - UI 2.0 support for settings controls
 - GitHub Actions workflow for automated release packaging
@@ -37,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
-[Unreleased]: https://github.com/Syrnik/wa-shop-sizer/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/Syrnik/wa-shop-sizer/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/Syrnik/wa-shop-sizer/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/Syrnik/wa-shop-sizer/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/Syrnik/wa-shop-sizer/releases/tag/v1.0.0
