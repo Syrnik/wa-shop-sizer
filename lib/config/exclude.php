@@ -3,6 +3,8 @@ return array(
     'README.md',
     'CHANGELOG.md',
     'CONTRIBUTING.md',
+    'LICENSE',
+    'LICENSE_ru',
     'contributors.txt',
     'img/screenshot_*',
     'img/screenshot-*',
@@ -36,5 +38,7 @@ return array(
     'lib/vendors/*/ci-gitlab/*',
     'lib/vendors/bin',
     'lib/vendors/jms/metadata/tests/Metadata/Tests',
-    'dox/*'
+    'dox/*',
+    'AGENTS.md',
+    'CLAUDE.md',
 );
