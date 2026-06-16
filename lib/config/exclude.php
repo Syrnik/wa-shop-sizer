@@ -1,6 +1,7 @@
 <?php
 return array(
     'README.md',
+    'README.en.md',
     'CHANGELOG.md',
     'CONTRIBUTING.md',
     'LICENSE',
@@ -42,4 +43,5 @@ return array(
     'AGENTS.md',
     'CLAUDE.md',
     'compress-app-plugin.php',
+    '.editorconfig',
 );
