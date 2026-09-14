@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="tests/init.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+  <coverage>
+    <include>
+      <file>lib/shopSizerPlugin.class.php</file>
+    </include>
+  </coverage>
+  <testsuites>
+    <testsuite name="sizer">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>
