@@ -17,12 +17,29 @@ class shopSizerPlugin extends shopPlugin
      * @return array|string
      * @throws Exception
      */
-    public function getControls($params = array()): array|string
+    public function getControls($params = array())
     {
         waHtmlControl::registerControl('DimensionInput', [$this, 'dimensionsInputControl']);
         waHtmlControl::registerControl('WeightInput', [$this, 'weightInputControl']);
         waHtmlControl::registerControl('PackageDimensions', [$this, 'packagesDimensionsControl']);
         return parent::getControls($params);
+    }
+
+    /**
+     * Отбрасывает из параметров контрола все *_wrapper-ключи
+     *
+     * @param array $params
+     * @return array
+     */
+    private function stripWrapperParams(array $params): array
+    {
+        return array_filter(
+            $params,
+            static function ($field) {
+                return strpos((string)$field, 'wrapper') === false;
+            },
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
     /**
@@ -34,7 +51,7 @@ class shopSizerPlugin extends shopPlugin
     public function dimensionsInputControl(string $name, array $params = []): string
     {
         $default_params = ['title' => '', 'title_wrapper' => false, 'description' => ''];
-        $params = array_filter($params, fn($field) => !str_contains($field, 'wrapper'), ARRAY_FILTER_USE_KEY);
+        $params = $this->stripWrapperParams($params);
 
         $is_ui2 = version_compare(wa()->whichUI(), '2.0', '>=');
 
@@ -117,7 +134,7 @@ class shopSizerPlugin extends shopPlugin
         waHtmlControl::makeId($params);
 
         $default_params = ['title' => '', 'title_wrapper' => false, 'description' => '',];
-        $params = array_filter($params, fn($field) => !str_contains($field, 'wrapper'), ARRAY_FILTER_USE_KEY);
+        $params = $this->stripWrapperParams($params);
 
         $params = array_merge($params, $default_params);
         waHtmlControl::addNamespace($params, $name);
@@ -150,7 +167,7 @@ class shopSizerPlugin extends shopPlugin
     {
         $is_ui2 = version_compare(wa()->whichUI(), '2.0', '>=');
         $default_params = ['title' => '', 'title_wrapper' => false, 'description' => ''];
-        $params = array_filter($params, fn($field) => !str_contains($field, 'wrapper'), ARRAY_FILTER_USE_KEY);
+        $params = $this->stripWrapperParams($params);
 
         $params = array_merge($params, $default_params);
         waHtmlControl::addNamespace($params, $name);

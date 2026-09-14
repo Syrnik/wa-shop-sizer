@@ -5,7 +5,7 @@ Shipment Dimensions Calculator Plugin for Shop-Script
 
 ## Requirements
 
-- PHP 8.2+
+- PHP 7.4+
 - Shop-Script 8.0+
 
 ## How It Works
