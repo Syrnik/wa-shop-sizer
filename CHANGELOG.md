@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Minimum PHP version lowered back to 7.4
 
+### Fixed
+- Removed unreachable dead code in `weightInputControl()` and an unused variable in
+  `packagesDimensionsControl()`, found via a new Psalm static-analysis setup
+
 ## [3.0.0] - 2026-06-17
 
 ### Added

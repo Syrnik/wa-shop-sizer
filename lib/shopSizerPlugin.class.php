@@ -123,10 +123,6 @@ class shopSizerPlugin extends shopPlugin
             $weight_value = (float)str_replace(',', '.', trim($weight_value));
         }
         $unit_value = ($value[$unit_field_name] ?? 'kg') ?: 'kg';
-        if (!$unit_value) {
-            $base_unit = shopDimension::getBaseUnit('weight');
-            $unit_value = $base_unit['value'] ?? 'kg';
-        }
 
         unset($params['field_names']);
         $controls = [];
@@ -239,14 +235,6 @@ class shopSizerPlugin extends shopPlugin
             'add_weight' => 30,
             'add_weight_unit' => 'g'
         ]);
-
-        $empty_row = "<tr class=\"js-size-row\"><td>"
-            . _wp('от')
-            . " {$empty_row_controls['weight']}</td>" .
-            "<td>{$empty_row_controls['size']}</td><td>{$empty_row_controls['add_weight']}</td>" .
-            "<td class=\"actions\"><a href=\"javascript:void(0)\" title=\""
-            . _wp('Удалить')
-            . "\" class=\"js-action-delete\"><i class=\"icon16 no\"></i></a></td></tr>";
 
         $namespace = (string)waHtmlControl::makeNamespace($row_params);
         $table_id = $params['id'] . '-table';
