@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.2] - 2026-09-27
+
 ### Fixed
 - Package selection now takes item dimensions into account, as described in README: if the largest dimension
   of an item exceeds the largest dimension of the package selected by weight, the first package for a heavier
@@ -53,7 +55,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
-[Unreleased]: https://github.com/Syrnik/wa-shop-sizer/compare/v3.0.1...HEAD
+[Unreleased]: https://github.com/Syrnik/wa-shop-sizer/compare/v3.0.2...HEAD
+[3.0.2]: https://github.com/Syrnik/wa-shop-sizer/compare/v3.0.1...v3.0.2
 [3.0.1]: https://github.com/Syrnik/wa-shop-sizer/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/Syrnik/wa-shop-sizer/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/Syrnik/wa-shop-sizer/compare/v1.0.0...v2.0.0
