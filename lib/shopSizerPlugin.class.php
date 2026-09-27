@@ -13,6 +13,11 @@ declare(strict_types=1);
 class shopSizerPlugin extends shopPlugin
 {
     /**
+     * Допуск при сравнении габаритов, пересчитанных из других единиц
+     */
+    private const DIMENSION_EPSILON = 1e-9;
+
+    /**
      * @param array $params
      * @return array|string
      * @throws Exception
@@ -313,11 +318,25 @@ class shopSizerPlugin extends shopPlugin
             0.0
         );
 
+        // Габариты товаров Shop-Script передаёт уже в базовой единице длины (value_base_unit)
+        $item_max_dimension = array_reduce(
+            $items,
+            fn($carry, $item) => max(
+                $carry,
+                (float)str_replace(',', '.', (string)($item['length'] ?? 0)),
+                (float)str_replace(',', '.', (string)($item['width'] ?? 0)),
+                (float)str_replace(',', '.', (string)($item['height'] ?? 0))
+            ),
+            0.0
+        );
+
         $base_weight_unit = $this->getBaseUnitCode('weight', 'kg');
+        $base_linear_unit = $this->getBaseUnitCode();
         $package_dimensions = $this->getSettings('default_size');
         foreach (['width', 'height', 'length'] as $item) {
             $package_dimensions[$item] = (float)str_replace(',', '.', (string)$package_dimensions[$item]);
         }
+        $package_dimensions = $this->convertToLinearUnit($package_dimensions, $base_linear_unit);
         $default_add_weight = $this->getSettings('default_add_weight');
         $package_dimensions['add_weight'] = (float)str_replace(',', '.', (string)$default_add_weight['value']);
         $package_dimensions['add_weight_unit'] = $base_weight_unit;
@@ -334,7 +353,7 @@ class shopSizerPlugin extends shopPlugin
         $sizes = $this->getSettings('sizes');
         if ($sizes && isset($sizes['packs']) && $sizes['packs']) {
             $sizes_weight_unit = $sizes['weight_unit'] ?? 'kg';
-            array_walk($sizes['packs'], function (&$p) use ($sizes_weight_unit, $base_weight_unit) {
+            array_walk($sizes['packs'], function (&$p) use ($sizes_weight_unit, $base_weight_unit, $base_linear_unit) {
                 foreach (['weight', 'width', 'height', 'length', 'add_weight'] as $key) {
                     $p[$key] = (float)str_replace(',', '.', (string)$p[$key]);
                 }
@@ -358,29 +377,35 @@ class shopSizerPlugin extends shopPlugin
                                                     );
                     $p['add_weight_unit'] = $base_weight_unit;
                 }
+                $p = $this->convertToLinearUnit($p, $base_linear_unit);
             });
             usort($sizes['packs'], function ($a, $b) {
                 return $a['weight'] <=> $b['weight'];
             });
 
-            foreach ($sizes['packs'] as $pack) {
+            // Упаковка по весу: самая тяжёлая, порог которой не превышает вес заказа.
+            // null — вес меньше самого лёгкого порога, остаётся упаковка по умолчанию.
+            $selected = null;
+            foreach ($sizes['packs'] as $idx => $pack) {
                 if ($total_weight < $pack['weight']) {
                     break;
                 }
-                $package_dimensions = $pack;
+                $selected = $idx;
             }
-        }
+            if ($selected !== null) {
+                $package_dimensions = $sizes['packs'][$selected];
+            }
 
-        $base_linear_unit = $this->getBaseUnitCode();
-        if ($package_dimensions['unit'] !== $base_linear_unit) {
-            foreach (['width', 'height', 'length'] as $key) {
-                $package_dimensions[$key] = shopDimension::getInstance()
-                                                         ->convert(
-                                                             $package_dimensions[$key],
-                                                             'length',
-                                                             $base_linear_unit,
-                                                             $package_dimensions['unit']
-                                                         );
+            // Товар не помещается по максимальному габариту — берём первую из упаковок для большего
+            // веса, в которую он влезает. Если такой нет, остаётся упаковка, выбранная по весу.
+            if ($item_max_dimension > $this->getMaxDimension($package_dimensions) + self::DIMENSION_EPSILON) {
+                $heavier_packs = array_slice($sizes['packs'], $selected === null ? 0 : $selected + 1);
+                foreach ($heavier_packs as $pack) {
+                    if ($item_max_dimension <= $this->getMaxDimension($pack) + self::DIMENSION_EPSILON) {
+                        $package_dimensions = $pack;
+                        break;
+                    }
+                }
             }
         }
 
@@ -390,6 +415,35 @@ class shopSizerPlugin extends shopPlugin
             'width' => $package_dimensions['width'],
             'height' => $package_dimensions['height']
         ];
+    }
+
+    /**
+     * Переводит length/width/height упаковки в указанную единицу длины
+     *
+     * @param array $package
+     * @param string $unit
+     * @return array
+     */
+    private function convertToLinearUnit(array $package, string $unit): array
+    {
+        if ($package['unit'] !== $unit) {
+            foreach (['width', 'height', 'length'] as $key) {
+                $package[$key] = shopDimension::getInstance()
+                                              ->convert($package[$key], 'length', $unit, $package['unit']);
+            }
+            $package['unit'] = $unit;
+        }
+
+        return $package;
+    }
+
+    /**
+     * @param array $package
+     * @return float
+     */
+    private function getMaxDimension(array $package): float
+    {
+        return (float)max($package['length'], $package['width'], $package['height']);
     }
 
     /**

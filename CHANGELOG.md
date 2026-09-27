@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Package selection now takes item dimensions into account, as described in README: if the largest dimension
+  of an item exceeds the largest dimension of the package selected by weight, the first package for a heavier
+  weight that fits the item is used instead
+
 ## [3.0.1] - 2026-09-15
 
 ### Changed

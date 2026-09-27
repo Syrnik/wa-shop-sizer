@@ -244,36 +244,150 @@ class shopSizerPluginShippingPackageTest extends TestCase
     }
 
     /**
-     * README.md обещает: «Если в заказе есть товар, максимальный габарит которого превышает
-     * максимальный габарит упаковки, ищется следующая упаковка, для большего веса, такая, чтобы
-     * её габарит превышал габарит заказа». handlerShippingPackage() габариты товаров не смотрит
-     * вообще — подбор только по весу. Этот тест фиксирует фактическое поведение кода; падение
-     * теста означает либо реализовали обещанное в README (тест надо переписать), либо сломали
-     * подбор.
+     * Три упаковки по возрастанию порога веса: 20 см (от 1 кг), 40 см (от 5 кг), 60 см (от 10 кг).
+     * Максимальный габарит каждой — length, по нему видно, какая упаковка выбрана.
+     * Габариты товаров в тестах — в метрах (базовая единица, как их передаёт Shop-Script).
      */
-    public function testItemDimensionsDoNotAffectPackSelectionDespiteReadmeClaim(): void
+    private function makePluginWithThreePacks(): shopSizerPluginTestDouble
+    {
+        return $this->makePlugin([
+            'default_size'       => ['length' => 10, 'width' => 10, 'height' => 10, 'unit' => 'cm'],
+            'default_add_weight' => ['value' => 0, 'unit' => 'kg'],
+            'sizes'              => ['weight_unit' => 'kg', 'packs' => [
+                ['weight' => 1, 'width' => 10, 'height' => 10, 'length' => 20, 'unit' => 'cm', 'add_weight' => 100, 'add_weight_unit' => 'g'],
+                ['weight' => 5, 'width' => 20, 'height' => 20, 'length' => 40, 'unit' => 'cm', 'add_weight' => 300, 'add_weight_unit' => 'g'],
+                ['weight' => 10, 'width' => 30, 'height' => 30, 'length' => 60, 'unit' => 'cm', 'add_weight' => 500, 'add_weight_unit' => 'g'],
+            ]],
+        ]);
+    }
+
+    public function testItemsWithoutDimensionsKeepWeightBasedSelection(): void
+    {
+        $result = $this->makePluginWithThreePacks()->handlerShippingPackage([
+            ['quantity' => 2, 'weight' => 1],
+        ]);
+
+        $this->assertEqualsWithDelta(2.1, $result['weight'], self::DELTA);
+        $this->assertEqualsWithDelta(0.2, $result['length'], self::DELTA);
+    }
+
+    public function testItemThatFitsWeightBasedPackKeepsIt(): void
+    {
+        $result = $this->makePluginWithThreePacks()->handlerShippingPackage([
+            ['quantity' => 2, 'weight' => 1, 'length' => 0.15, 'width' => 0.1, 'height' => 0.05],
+        ]);
+
+        $this->assertEqualsWithDelta(0.2, $result['length'], self::DELTA);
+    }
+
+    public function testOversizedItemSelectsNextHeavierPackThatFits(): void
+    {
+        // По весу (2 кг) — упаковка 20 см, но товар 30 см: берётся следующая, 40 см, вместе с её весом.
+        $result = $this->makePluginWithThreePacks()->handlerShippingPackage([
+            ['quantity' => 2, 'weight' => 1, 'length' => 0.3, 'width' => 0.1, 'height' => 0.1],
+        ]);
+
+        $this->assertEqualsWithDelta(2.3, $result['weight'], self::DELTA);
+        $this->assertEqualsWithDelta(0.4, $result['length'], self::DELTA);
+        $this->assertEqualsWithDelta(0.2, $result['width'], self::DELTA);
+        $this->assertEqualsWithDelta(0.2, $result['height'], self::DELTA);
+    }
+
+    public function testHeavierPackThatIsStillTooSmallIsSkipped(): void
+    {
+        $result = $this->makePluginWithThreePacks()->handlerShippingPackage([
+            ['quantity' => 2, 'weight' => 1, 'length' => 0.5],
+        ]);
+
+        $this->assertEqualsWithDelta(2.5, $result['weight'], self::DELTA);
+        $this->assertEqualsWithDelta(0.6, $result['length'], self::DELTA);
+    }
+
+    public function testLongestDimensionOfAnyItemIsCompared(): void
+    {
+        // Максимальный габарит заказа — height второго товара, а не length.
+        $result = $this->makePluginWithThreePacks()->handlerShippingPackage([
+            ['quantity' => 1, 'weight' => 1, 'length' => 0.1, 'width' => 0.1, 'height' => 0.1],
+            ['quantity' => 1, 'weight' => 1, 'length' => 0.1, 'width' => 0.1, 'height' => 0.35],
+        ]);
+
+        $this->assertEqualsWithDelta(0.4, $result['length'], self::DELTA);
+    }
+
+    public function testItemDimensionEqualToPackDimensionFits(): void
+    {
+        $result = $this->makePluginWithThreePacks()->handlerShippingPackage([
+            ['quantity' => 2, 'weight' => 1, 'length' => 0.2],
+        ]);
+
+        $this->assertEqualsWithDelta(0.2, $result['length'], self::DELTA);
+    }
+
+    public function testOversizedItemWithDefaultSizeSearchesFromLightestPack(): void
+    {
+        // Вес 0,5 кг меньше самого лёгкого порога — по весу упаковка по умолчанию (10 см),
+        // товар 15 см в неё не лезет, подходит уже первая упаковка из списка (20 см).
+        $result = $this->makePluginWithThreePacks()->handlerShippingPackage([
+            ['quantity' => 1, 'weight' => 0.5, 'length' => 0.15],
+        ]);
+
+        $this->assertEqualsWithDelta(0.6, $result['weight'], self::DELTA);
+        $this->assertEqualsWithDelta(0.2, $result['length'], self::DELTA);
+    }
+
+    public function testWeightBasedPackIsKeptWhenNoHeavierPackFits(): void
     {
         $plugin = $this->makePlugin([
             'default_size'       => ['length' => 10, 'width' => 10, 'height' => 10, 'unit' => 'cm'],
             'default_add_weight' => ['value' => 0, 'unit' => 'kg'],
-            // Единственная упаковка заведомо меньше габаритов товара из заказа.
             'sizes'              => ['weight_unit' => 'kg', 'packs' => [
                 ['weight' => 1, 'width' => 5, 'height' => 5, 'length' => 5, 'unit' => 'cm', 'add_weight' => 0, 'add_weight_unit' => 'kg'],
             ]],
         ]);
 
         $result = $plugin->handlerShippingPackage([
-            // Габарит товара (length) намного больше габарита выбранной упаковки — README ожидал
-            // бы поиска упаковки покрупнее, но такого ключа handlerShippingPackage() даже не читает.
-            ['quantity' => 1, 'weight' => 1, 'length' => 200],
+            ['quantity' => 1, 'weight' => 1, 'length' => 2],
         ]);
 
-        $this->assertEqualsWithDelta(
-            0.05,
-            $result['length'],
-            self::DELTA,
-            'handlerShippingPackage() не учитывает габариты товаров вопреки описанию в README.md — ' .
-            'см. секцию "Вне scope" в плане MYOTH-562'
-        );
+        $this->assertEqualsWithDelta(0.05, $result['length'], self::DELTA);
+    }
+
+    public function testLighterPacksAreNotConsideredForOversizedItem(): void
+    {
+        // По весу выбрана упаковка 60 см; товар 70 см не влезает никуда. Более лёгкие упаковки
+        // не рассматриваются — остаётся выбранная по весу.
+        $result = $this->makePluginWithThreePacks()->handlerShippingPackage([
+            ['quantity' => 1, 'weight' => 12, 'length' => 0.7],
+        ]);
+
+        $this->assertEqualsWithDelta(0.6, $result['length'], self::DELTA);
+    }
+
+    public function testPackDimensionsInOtherUnitsAreComparedInBaseUnit(): void
+    {
+        $plugin = $this->makePlugin([
+            'default_size'       => ['length' => 10, 'width' => 10, 'height' => 10, 'unit' => 'cm'],
+            'default_add_weight' => ['value' => 0, 'unit' => 'kg'],
+            'sizes'              => ['weight_unit' => 'kg', 'packs' => [
+                // 250 мм = 0,25 м — товар 0,3 м не влезает, хотя 250 > 0,3 без перевода единиц.
+                ['weight' => 1, 'width' => 100, 'height' => 100, 'length' => 250, 'unit' => 'mm', 'add_weight' => 0, 'add_weight_unit' => 'kg'],
+                ['weight' => 5, 'width' => 0.2, 'height' => 0.2, 'length' => 0.35, 'unit' => 'm', 'add_weight' => 0, 'add_weight_unit' => 'kg'],
+            ]],
+        ]);
+
+        $result = $plugin->handlerShippingPackage([
+            ['quantity' => 1, 'weight' => 1, 'length' => 0.3],
+        ]);
+
+        $this->assertEqualsWithDelta(0.35, $result['length'], self::DELTA);
+    }
+
+    public function testItemDimensionWithCommaAsDecimalSeparator(): void
+    {
+        $result = $this->makePluginWithThreePacks()->handlerShippingPackage([
+            ['quantity' => 2, 'weight' => 1, 'length' => '0,3'],
+        ]);
+
+        $this->assertEqualsWithDelta(0.4, $result['length'], self::DELTA);
     }
 }
